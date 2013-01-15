@@ -1,3 +1,5 @@
+// Copyright © 2013 Ian Phillips.
+// See the accompanying LICENSE.md file for further information.
 package org.ianp.praxis;
 
 import java.io.Console;

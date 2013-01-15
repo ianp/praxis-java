@@ -19,23 +19,17 @@ public class RPNCalculator {
    
     private static void processLine(String line) {
         for (String s : line.split("\\s+")) {
-            switch (s) {
-            case "+":
+            if ("+".equals(s)) {
                 stack.push(stack.pop().add(stack.pop()));
-                break;
-            case "-":
+            } else if ("-".equals(s)) {
                 stack.push(stack.pop().subtract(stack.pop()));
-                break;
-            case "*":
+            } else if ("*".equals(s)) {
                 stack.push(stack.pop().multiply(stack.pop()));
-                break;
-            case "/":
+            } else if ("/".equals(s)) {
                 stack.push(stack.pop().divide(stack.pop()));
-                break;
-            case "quit":
-            case "exit":
+            } else if ("exit".equalsIgnoreCase(s) || "quit".equalsIgnoreCase(s)) {
                 System.exit(0);
-            default:
+            } else {
                 stack.push(new BigDecimal(s));
             }
         }

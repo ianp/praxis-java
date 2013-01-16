@@ -1,6 +1,6 @@
 // Copyright © 2013 Ian Phillips.
 // See the accompanying LICENSE.md file for further information.
-package org.ianp.praxis.tests;
+package org.ianp.praxis;
 
 import org.ianp.praxis.SieveOfEratosthenes;
 import org.junit.Test;

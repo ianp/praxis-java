@@ -12,7 +12,7 @@ import static java.math.BigDecimal.ZERO;
  * Bingo probablities.
  * <p>
  * A solution to <a href="http://programmingpraxis.com/2009/02/19/bingo/">this problem</a>.
- * Full documentation in <a href="http://ianp.org/2013/01/18/praxis-winning-at-bingo/">this blog post</a>.
+ * Full documentation in <a href="http://ianp.org/2013/01/17/praxis-winning-at-bingo/">this blog post</a>.
  */
 public class BingoOdds {
 
@@ -71,6 +71,11 @@ public class BingoOdds {
         return div(fact(bn), mul(fact(bk), fact(sub(bn, bk))));
     }
 
+    private static BigDecimal getHitProbability(int numberOfHits, int numberOfCalls) {
+        return div(mul(combinations(SQUARES, numberOfHits), combinations(NUMBERS - SQUARES, numberOfCalls - numberOfHits)),
+                combinations(NUMBERS, numberOfCalls));
+    }
+
     public static void main(String[] args) {
         BingoOdds bingo = new BingoOdds();
         bingo.printStatistics();
@@ -102,11 +107,6 @@ public class BingoOdds {
         return stats;
     }
 
-    private static BigDecimal getHitProbability(int numberOfHits, int numberOfCalls) {
-        return div(mul(combinations(SQUARES, numberOfHits), combinations(NUMBERS - SQUARES, numberOfCalls - numberOfHits)),
-                combinations(NUMBERS, numberOfCalls));
-    }
-
     private BigDecimal[] createSingleBoardProbabilities() {
         BigDecimal[] probabilities = new BigDecimal[NUMBERS];
         for (int n = 1; n < 4; ++n) {
@@ -115,10 +115,7 @@ public class BingoOdds {
         for (int n = 4; n <= NUMBERS; ++n) {
             BigDecimal sum = ZERO;
             for (int i = 4; i <= SQUARES; ++i) {
-                BigDecimal p = stats[i - 1].probability;
-                BigDecimal hp = getHitProbability(i, n);
-                BigDecimal m = mul(hp, p);
-                sum = add(sum, m);
+                sum = add(sum, mul(getHitProbability(i, n), stats[i - 1].probability));
             }
             probabilities[n - 1] = sum;
         }

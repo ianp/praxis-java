@@ -82,51 +82,59 @@ public class BingoOdds {
         bingo.printProbabilities(1, 10, 25, 50);
     }
 
-    private final Stats[] stats = createStats();
+    // number of possible Bingo positions based on hits
+    private final long[] bingoCombinations = createBingoCombinations();
 
-    private final BigDecimal[] probabilities = createSingleBoardProbabilities();
+    // probability of a Bingo position based on hits
+    private final BigDecimal[] bingoProbabilities = createBingoProbabilities();
 
-    private Stats[] createStats() {
-        Stats[] stats = new Stats[25];
-        for (int i = 0; i < stats.length; i++) {
-            stats[i] = new Stats();
-        }
+    // single board probability of a Bingo position based on numbers called
+    private final BigDecimal[] boardProbabilities = createBoardProbabilities();
+
+    private long[] createBingoCombinations() {
+        long[] combinations = new long[SQUARES + 1];
         for (int i = 0; i <= 0b111111111111111111111111; ++i) {
             for (int bingo : BINGOS) {
                 if ((i & bingo) == bingo) {
-                    stats[Integer.bitCount(i)].combinations++;
+                    combinations[Integer.bitCount(i)]++;
                     break;
                 }
             }
         }
-        stats[0].probability = ZERO;
-        for (int i = 1; i < stats.length; i++) {
-            Stats stat = stats[i];
-            stat.probability = div(d(stat.combinations), combinations(24, i));
-        }
-        return stats;
+        return combinations;
     }
 
-    private BigDecimal[] createSingleBoardProbabilities() {
-        BigDecimal[] probabilities = new BigDecimal[NUMBERS];
-        for (int n = 1; n < 4; ++n) {
-            probabilities[n - 1] = ZERO;
+    private BigDecimal[] createBingoProbabilities() {
+        BigDecimal[] probabilities = new BigDecimal[SQUARES + 1];
+        for (int i = 0; i < 4; ++i) {
+            probabilities[i] = ZERO;
+        }
+        for (int i = 4; i <= SQUARES; ++i) {
+            probabilities[i] = div(d(bingoCombinations[i]), combinations(SQUARES, i));
+        }
+        return probabilities;
+    }
+
+    private BigDecimal[] createBoardProbabilities() {
+        BigDecimal[] probabilities = new BigDecimal[NUMBERS + 1];
+        for (int n = 0; n < 4; ++n) {
+            probabilities[n] = ZERO;
         }
         for (int n = 4; n <= NUMBERS; ++n) {
             BigDecimal sum = ZERO;
-            for (int i = 4; i <= SQUARES; ++i) {
-                sum = add(sum, mul(getHitProbability(i, n), stats[i - 1].probability));
+            for (int s = 4; s <= SQUARES; ++s) {
+                sum = add(sum, mul(getHitProbability(s, n), bingoProbabilities[s]));
             }
-            probabilities[n - 1] = sum;
+            probabilities[n] = sum;
         }
         return probabilities;
     }
 
     public BigDecimal getProbability(int numberOfCalls, int numberOfBoards) {
         if (numberOfBoards == 1) {
-            return this.probabilities[numberOfCalls];
+            return boardProbabilities[numberOfCalls];
         }
-        return sub(ONE, pow(sub(ONE, this.probabilities[numberOfCalls]), numberOfBoards));
+        return sub(ONE, pow(sub(ONE, boardProbabilities[numberOfCalls]), numberOfBoards));
     }
 
     public void printStatistics() {
@@ -134,10 +142,9 @@ public class BingoOdds {
         System.out.println("Numbers Bingo     Bingo      ");
         System.out.println("Matched Combos    Probability");
         System.out.println("======= ========= ===========");
-        for (int i = 0; i < stats.length; i++) {
-            Stats stat = stats[i];
+        for (int i = 0; i <= SQUARES; i++) {
             System.out.printf("%7d %,9d %11.6f %n",
-                    i, stat.combinations, stat.probability);
+                    i, bingoCombinations[i], bingoProbabilities[i]);
         }
     }
 
@@ -171,19 +178,14 @@ public class BingoOdds {
         String fmt = printProbabilitiesBanner(boardCounts);
         StringBuilder b = new StringBuilder();
         Object[] ps = new Object[boardCounts.length + 1];
-        for (int i = 1; i <= 75; ++i) {
+        for (int i = 1; i <= NUMBERS; ++i) {
             b.setLength(0); // reset
             ps[0] = i;
             for (int j = 0; j < boardCounts.length; ++j) {
-                ps[j + 1] = getProbability(i - 1, boardCounts[j]);
+                ps[j + 1] = getProbability(i, boardCounts[j]);
             }
             System.out.printf(fmt, ps);
         }
-    }
-
-    static class Stats {
-        long combinations;
-        BigDecimal probability;
     }
 
 }

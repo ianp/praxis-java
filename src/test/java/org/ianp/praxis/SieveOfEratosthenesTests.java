@@ -2,7 +2,6 @@
 // See the accompanying LICENSE.md file for further information.
 package org.ianp.praxis;
 
-import org.ianp.praxis.SieveOfEratosthenes;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
